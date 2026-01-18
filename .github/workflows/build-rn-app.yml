@@ -376,40 +376,17 @@ jobs:
       - name: "⚡ Fast Android Build (Cached)"
         run: |
           cd android
-          echo "Starting fast cached build..."
+          export GRADLE_OPTS="-Xmx4g -XX:+UseG1GC"
           
-          export GRADLE_OPTS="-Xmx4g -XX:MaxMetaspaceSize=512m -Dorg.gradle.daemon=false -Dorg.gradle.parallel=true -Dorg.gradle.caching=true -Dorg.gradle.configureondemand=true"
-          export _JAVA_OPTIONS="-Xmx3g"
-          
+          # Build only the app module
           if [ "${{ env.BUILD_TYPE }}" == "release" ]; then
             if [ "${{ env.OUTPUT_TYPE }}" == "aab" ]; then
-              ./gradlew bundleRelease \
-                --build-cache \
-                --parallel \
-                --max-workers=4 \
-                --no-daemon \
-                -Dorg.gradle.jvmargs="-Xmx3g" \
-                -Pkotlin.incremental=true \
-                -Pkotlin.incremental.usePreciseJavaTracking=true
+              ./gradlew :app:bundleRelease --build-cache --parallel --offline --max-workers=4
             else
-              ./gradlew assembleRelease \
-                --build-cache \
-                --parallel \
-                --max-workers=4 \
-                --no-daemon \
-                -Dorg.gradle.jvmargs="-Xmx3g" \
-                -Pkotlin.incremental=true \
-                -Pkotlin.incremental.usePreciseJavaTracking=true
+              ./gradlew :app:assembleRelease --build-cache --parallel --offline --max-workers=4
             fi
           else
-            ./gradlew assembleDebug \
-              --build-cache \
-              --parallel \
-              --max-workers=4 \
-              --no-daemon \
-              -Dorg.gradle.jvmargs="-Xmx3g" \
-              -Pkotlin.incremental=true \
-              -Pkotlin.incremental.usePreciseJavaTracking=true
+            ./gradlew :app:assembleDebug --build-cache --parallel --offline --max-workers=4
           fi
 
       - name: "✅ Verify Build Output"
